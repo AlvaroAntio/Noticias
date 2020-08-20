@@ -1,26 +1,50 @@
-import React from 'react';
+import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
+import { connect } from 'react-redux'
+import Category from './components/Category'
+import { addCategory, selectCategory } from './reducers/Categorias'
+import { addNews } from './reducers/Noticias'
+import { reset } from 'redux-form'
+import News from './components/News'
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+class App extends Component{
+  render () {
+    const { 
+      categories,
+      news,
+      addCategory,
+      selectCategory,
+      selected,
+      addNews } = this.props
+    return (
+      <div className="App">
+      <Category 
+        selectCategory={selectCategory}
+        addCategory={addCategory}
+        categories={categories} />
+      <News addNews={addNews} selectedCategory={selected} news={news} />
+      </div>
+    )
+  }
 }
+const mapStateToProps = state => {
+  const { Categorias: { data: categories, selected } } = state
+  const { Noticias: { data: news } } = state
+  console.log(news)
+  return {
+    categories,
+    news: news.filter(x => x.categoryId === selected),
+    selected,
+  }
+}
+const mapDispatchToProps = dispatch => ({
+  addCategory: payload => {
+    dispatch(addCategory(payload))
+    dispatch(reset('category'))
+  },
+  selectCategory: payload => dispatch(selectCategory(payload)),
+  addNews: payload => dispatch(addNews(payload)),
+})
 
-export default App;
+export default connect(mapStateToProps, mapDispatchToProps)(App)
